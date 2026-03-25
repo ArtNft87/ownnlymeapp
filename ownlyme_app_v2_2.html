@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OwnlyMe — App Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html, body {
+  min-height:100vh;
+  background:#111;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Plus Jakarta Sans', sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+:root {
+  --green:   #22C55E;
+  --green-d: #16A34A;
+  --green-l: #DCFCE7;
+  --black:   #0A0A0A;
+  --navy:    #0F172A;
+  --g1:      #1E293B;
+  --g2:      #334155;
+  --g3:      #64748B;
+  --g4:      #94A3B8;
+  --g5:      #CBD5E1;
+  --g6:      #E2E8F0;
+  --g7:      #F1F5F9;
+  --g8:      #F8FAFC;
+  --white:   #FFFFFF;
+  --bg:      #FAFAF9;
+  --red:     #EF4444;
+  --amber:   #F59E0B;
+  --blue:    #3B82F6;
+}
+
+/* ── PHONE FRAME ── */
+.phone {
+  width:390px; height:844px;
+  background:var(--bg);
+  border-radius:44px;
+  overflow:hidden;
+  position:relative;
+  box-shadow: 0 0 0 10px #2a2a2a, 0 0 0 12px #1a1a1a, 0 40px 100px rgba(0,0,0,.7);
+}
+
+/* ── SCREEN SYSTEM ── */
+.screen {
+  position:absolute; inset:0;
+  background:var(--bg);
+  display:flex; flex-direction:column;
+  overflow:hidden;
+  transform:translateX(110%);
+  transition:transform .36s cubic-bezier(.4,0,.2,1);
+  will-change:transform;
+}
+.screen.active { transform:translateX(0); }
+
+/* ── STATUS BAR ── */
+.sb {
+  display:flex; align-items:center;
+  justify-content:space-between;
+  padding:14px 28px 0;
+  flex-shrink:0;
+}
+.sb.dk { background:var(--navy); }
+.sb.cam { background:#000; }
+.sb-t { font-size:.8rem; font-weight:700; color:var(--black); letter-spacing:-.01em; }
+.sb.dk .sb-t, .sb.cam .sb-t { color:#fff; }
+.sb-i { display:flex; gap:5px; align-items:center; color:var(--black); font-size:.65rem; font-weight:600; }
+.sb.dk .sb-i, .sb.cam .sb-i { color:#fff; }
+
+/* ── BACK BUTTON ── */
+.back-btn {
+  width:40px; height:40px;
+  background:var(--g7); border:none; border-radius:12px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--black); transition:background .15s;
+  flex-shrink:0;
+}
+.back-btn.dk { background:rgba(255,255,255,.1); color:#fff; }
+.back-btn:active { background:var(--g6); }
+.back-btn svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+
+/* ── OB SHELL ── */
+.ob-hd { padding:16px 24px 0; flex-shrink:0; }
+.ob-body { padding:28px 24px 0; flex-shrink:0; }
+.ob-foot { padding:16px 24px 32px; flex-shrink:0; display:flex; flex-direction:column; gap:10px; }
+
+/* ── PROGRESS ── */
+.prog { display:flex; gap:4px; margin-bottom:24px; }
+.prog-dot { height:3px; flex:1; background:var(--g6); border-radius:2px; transition:background .3s; }
+.prog-dot.on { background:var(--green); }
+
+/* ── EYEBROW / TITLE / SUB ── */
+.ey { font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--green); margin-bottom:10px; }
+.tt { font-size:1.9rem; font-weight:800; color:var(--black); line-height:1.1; letter-spacing:-.04em; margin-bottom:8px; }
+.tt em { color:var(--green); font-style:normal; }
+.su { font-size:.875rem; color:var(--g3); line-height:1.65; margin-bottom:28px; }
+
+/* ── INPUTS ── */
+.fl { display:flex; flex-direction:column; gap:4px; margin-bottom:14px; }
+.fl-l { font-size:.68rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--g3); padding-left:2px; }
+.fi-wrap { position:relative; display:flex; align-items:center; }
+.fi {
+  width:100%; background:#fff;
+  border:1.5px solid var(--g6); border-radius:14px;
+  padding:15px 16px; font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:.95rem; font-weight:500; color:var(--black);
+  outline:none; transition:border-color .2s, box-shadow .2s;
+}
+.fi:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(34,197,94,.1); }
+.fi::placeholder { color:var(--g4); font-weight:400; }
+.fi-pre { position:absolute; left:16px; font-size:.95rem; font-weight:600; color:var(--g4); }
+.fi.pre { padding-left:36px; }
+.fi-suf { position:absolute; right:14px; color:var(--g4); cursor:pointer; }
+.fi-suf svg { width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; }
+.fi-hint { font-size:.72rem; color:var(--g4); padding-left:2px; }
+.fi-hint.ok { color:var(--green); }
+
+/* ── BUTTONS ── */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  border-radius:14px; border:none; cursor:pointer;
+  font-family:'Plus Jakarta Sans',sans-serif; font-weight:700;
+  letter-spacing:-.01em; transition:transform .15s, opacity .15s;
+}
+.btn:active { transform:scale(.97); opacity:.88; }
+.btn:disabled { opacity:.35; cursor:not-allowed; transform:none !important; }
+.btn-p { background:var(--green); color:#fff; width:100%; padding:18px; font-size:1rem; }
+.btn-s { background:var(--g7); color:var(--black); width:100%; padding:16px; font-size:.9rem; }
+.btn-o { background:transparent; color:var(--black); width:100%; padding:15px; font-size:.9rem; border:1.5px solid var(--g6); }
+
+/* ── SCROLLABLE ── */
+.scroll { flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.scroll::-webkit-scrollbar { display:none; }
+
+/* ── BOTTOM NAV ── */
+.bnav {
+  display:flex; align-items:center; padding:0 8px 28px;
+  background:#fff; border-top:1px solid var(--g7); flex-shrink:0;
+}
+.ni {
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;
+  padding:12px 4px 0; cursor:pointer; border:none; background:none;
+  font-family:'Plus Jakarta Sans',sans-serif; color:var(--g4); transition:color .2s;
+}
+.ni.on { color:var(--green); }
+.ni svg { width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.ni.on svg { stroke-width:2.5; }
+.ni span { font-size:.6rem; font-weight:700; letter-spacing:.04em; }
+
+/* ══════════════════════════════════════
+   SPLASH
+══════════════════════════════════════ */
+#splash { background:var(--navy); align-items:center; justify-content:center; }
+.sp-glow { position:absolute; width:380px; height:380px; background:radial-gradient(circle, rgba(34,197,94,.2) 0%, transparent 70%); top:30%; left:50%; transform:translate(-50%,-50%); pointer-events:none; animation:glowPulse 4s ease-in-out infinite; }
+@keyframes glowPulse { 0%,100%{opacity:.6;transform:translate(-50%,-50%) scale(1)} 50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)} }
+.sp-logo { display:flex; flex-direction:column; align-items:center; gap:18px; position:relative; z-index:1; }
+.sp-icon { width:88px; height:88px; background:var(--green); border-radius:28px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 60px rgba(34,197,94,.5); animation:iconPop .6s cubic-bezier(.175,.885,.32,1.275) forwards; }
+@keyframes iconPop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+.sp-icon svg { width:48px; height:48px; fill:#fff; }
+.sp-name { font-size:2rem; font-weight:800; color:#fff; letter-spacing:-.04em; }
+.sp-name span { color:var(--green); }
+.sp-tag { font-size:.7rem; color:rgba(255,255,255,.3); letter-spacing:.16em; text-transform:uppercase; }
+.sp-btn { position:absolute; bottom:56px; left:24px; right:24px; }
+
+/* ══════════════════════════════════════
+   USERNAME
+══════════════════════════════════════ */
+
+/* ══════════════════════════════════════
+   PASSWORD STRENGTH
+══════════════════════════════════════ */
+.pw-bars { display:flex; gap:4px; margin-top:8px; }
+.pw-b { height:3px; flex:1; border-radius:2px; background:var(--g6); transition:background .3s; }
+.pw-b.w { background:var(--red); }
+.pw-b.m { background:var(--amber); }
+.pw-b.s { background:var(--green); }
+.pw-rs { display:flex; flex-direction:column; gap:6px; margin-top:14px; }
+.pw-r { display:flex; align-items:center; gap:8px; font-size:.75rem; color:var(--g4); }
+.pw-r.ok { color:var(--green); }
+.pw-rd { width:16px; height:16px; border-radius:50%; border:1.5px solid currentColor; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .2s; }
+.pw-r.ok .pw-rd { background:var(--green); border-color:var(--green); }
+.pw-r.ok .pw-rd::after { content:'✓'; font-size:.5rem; color:#fff; font-weight:800; }
+
+/* ══════════════════════════════════════
+   PIN
+══════════════════════════════════════ */
+.pin-dots { display:flex; justify-content:center; gap:14px; margin:28px 0 20px; }
+.pd { width:18px; height:18px; border-radius:50%; border:2px solid var(--g5); transition:all .2s; }
+.pd.on { background:var(--green); border-color:var(--green); transform:scale(1.15); }
+.pd.err { background:var(--red); border-color:var(--red); animation:shake .3s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+.numpad { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:0 24px; flex-shrink:0; }
+.nb {
+  aspect-ratio:1; background:#fff; border:1.5px solid var(--g6);
+  border-radius:20px; font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:1.5rem; font-weight:700; color:var(--black);
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  flex-direction:column; transition:background .1s, transform .1s;
+}
+.nb:active { background:var(--g7); transform:scale(.93); }
+.nb.empty { background:transparent; border-color:transparent; cursor:default; }
+.nb.del { background:var(--g7); border-color:transparent; }
+.nb-sub { font-size:.42rem; letter-spacing:.14em; color:var(--g4); font-weight:700; text-transform:uppercase; margin-top:2px; }
+
+/* ══════════════════════════════════════
+   DOC TYPE SELECT
+══════════════════════════════════════ */
+.doc-grid { display:flex; flex-direction:column; gap:10px; padding:0 24px; }
+.doc-opt {
+  background:#fff; border:1.5px solid var(--g6); border-radius:18px;
+  padding:18px 20px; display:flex; align-items:center; gap:16px;
+  cursor:pointer; transition:border-color .2s, box-shadow .2s;
+}
+.doc-opt:active { box-shadow:0 4px 20px rgba(0,0,0,.08); }
+.doc-opt.sel { border-color:var(--green); background:#F0FDF4; }
+.doc-icon { width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; }
+.doc-icon.g { background:var(--green-l); }
+.doc-icon.b { background:#EFF6FF; }
+.doc-icon.a { background:#FFFBEB; }
+.doc-info { flex:1; }
+.doc-name { font-size:.95rem; font-weight:700; color:var(--black); letter-spacing:-.01em; }
+.doc-hint { font-size:.75rem; color:var(--g3); margin-top:2px; }
+.doc-check { width:24px; height:24px; border-radius:50%; border:1.5px solid var(--g5); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .2s; }
+.doc-opt.sel .doc-check { background:var(--green); border-color:var(--green); color:#fff; font-size:.75rem; font-weight:800; }
+.doc-opt.sel .doc-check::after { content:'✓'; }
+
+/* ══════════════════════════════════════
+   CAMERA / SCAN SCREEN
+══════════════════════════════════════ */
+#docscan { background:#000; }
+.cam-bg { position:absolute; inset:0; background:#111; overflow:hidden; }
+.cam-img { width:100%; height:100%; object-fit:cover; opacity:.5; }
+.cam-overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2; }
+.scan-frame {
+  width:300px; height:200px;
+  border-radius:16px;
+  position:relative;
+}
+.scan-frame::before {
+  content:'';
+  position:absolute; inset:0;
+  border:2px solid rgba(255,255,255,.2);
+  border-radius:16px;
+}
+.sf-corner {
+  position:absolute;
+  width:28px; height:28px;
+  border-color:var(--green);
+  border-style:solid;
+  border-width:0;
+}
+.sf-tl { top:-1px; left:-1px; border-top-width:3px; border-left-width:3px; border-top-left-radius:12px; }
+.sf-tr { top:-1px; right:-1px; border-top-width:3px; border-right-width:3px; border-top-right-radius:12px; }
+.sf-bl { bottom:-1px; left:-1px; border-bottom-width:3px; border-left-width:3px; border-bottom-left-radius:12px; }
+.sf-br { bottom:-1px; right:-1px; border-bottom-width:3px; border-right-width:3px; border-bottom-right-radius:12px; }
+.scan-line {
+  position:absolute; left:8px; right:8px; height:2px;
+  background:linear-gradient(90deg, transparent, var(--green), transparent);
+  top:0;
+  animation:scanLine 2s ease-in-out infinite;
+  box-shadow:0 0 8px rgba(34,197,94,.6);
+}
+@keyframes scanLine { 0%{top:8px;opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{top:calc(100% - 8px);opacity:0} }
+.cam-doc-preview {
+  width:280px; height:180px;
+  background:linear-gradient(135deg, #1a2744 0%, #233066 100%);
+  border-radius:12px;
+  display:flex; flex-direction:column;
+  justify-content:space-between;
+  padding:20px;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+}
+.doc-preview-flag { font-size:1.2rem; }
+.doc-preview-title { font-size:.6rem; color:rgba(255,255,255,.5); letter-spacing:.12em; text-transform:uppercase; margin-top:4px; }
+.doc-preview-name { font-size:.95rem; font-weight:700; color:#fff; margin-top:auto; }
+.doc-preview-num { font-size:.65rem; color:rgba(255,255,255,.4); letter-spacing:.1em; margin-top:4px; }
+.doc-preview-mrz { font-size:.45rem; color:rgba(255,255,255,.2); letter-spacing:.04em; margin-top:8px; font-family:monospace; }
+.cam-label { color:#fff; font-size:.9rem; font-weight:600; margin-top:20px; text-align:center; }
+.cam-sub { color:rgba(255,255,255,.4); font-size:.75rem; margin-top:6px; text-align:center; }
+.cam-bottom { position:absolute; bottom:0; left:0; right:0; padding:24px; z-index:3; display:flex; flex-direction:column; align-items:center; gap:16px; }
+.cam-shutter {
+  width:72px; height:72px;
+  background:#fff; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; border:4px solid rgba(255,255,255,.3);
+  transition:transform .15s;
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
+}
+.cam-shutter:active { transform:scale(.9); }
+.cam-shutter-inner { width:56px; height:56px; background:#fff; border-radius:50%; border:3px solid var(--g6); }
+.cam-tip { color:rgba(255,255,255,.4); font-size:.72rem; text-align:center; }
+.cam-top-bar { position:absolute; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:52px 24px 16px; z-index:3; }
+.cam-top-bar-btn { width:40px; height:40px; background:rgba(255,255,255,.12); border:none; border-radius:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#fff; }
+.cam-top-bar-btn svg { width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.cam-flash { width:40px; height:40px; background:rgba(255,255,255,.12); border:none; border-radius:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--amber); }
+
+/* ══════════════════════════════════════
+   PROCESSING SCREEN
+══════════════════════════════════════ */
+#processing { background:var(--navy); }
+#liveness-processing { background:var(--navy); }
+.proc-inner { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center; }
+.proc-ring { width:100px; height:100px; position:relative; margin-bottom:32px; }
+.proc-ring svg { position:absolute; inset:0; animation:spinRing 1.5s linear infinite; }
+.proc-ring-bg { fill:none; stroke:rgba(255,255,255,.08); stroke-width:6; }
+.proc-ring-fill { fill:none; stroke:var(--green); stroke-width:6; stroke-linecap:round; stroke-dasharray:220; stroke-dashoffset:160; }
+@keyframes spinRing { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.proc-icon { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.8rem; }
+.proc-title { font-size:1.5rem; font-weight:800; color:#fff; letter-spacing:-.03em; margin-bottom:8px; }
+.proc-sub { font-size:.875rem; color:rgba(255,255,255,.4); line-height:1.65; max-width:260px; }
+.proc-steps { margin-top:40px; display:flex; flex-direction:column; gap:12px; width:100%; max-width:300px; }
+.proc-step { display:flex; align-items:center; gap:12px; }
+.proc-step-icon { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:.8rem; transition:all .4s; }
+.proc-step-icon.pending { background:rgba(255,255,255,.06); color:rgba(255,255,255,.2); }
+.proc-step-icon.active { background:rgba(34,197,94,.15); color:var(--green); animation:stepPulse 1s ease-in-out infinite; }
+.proc-step-icon.done { background:var(--green); color:#fff; }
+@keyframes stepPulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+.proc-step-label { font-size:.85rem; font-weight:600; color:rgba(255,255,255,.5); transition:color .4s; }
+.proc-step.active-step .proc-step-label { color:#fff; }
+.proc-step.done-step .proc-step-label { color:var(--green); }
+
+/* ══════════════════════════════════════
+   EMAIL VERIFICATION
+══════════════════════════════════════ */
+.otp-row { display:flex; gap:10px; justify-content:center; margin:20px 0; }
+.otp-box {
+  width:52px; height:60px;
+  background:#fff; border:1.5px solid var(--g6);
+  border-radius:14px; text-align:center;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:1.5rem; font-weight:800;
+  color:var(--black); outline:none;
+  transition:border-color .2s, box-shadow .2s;
+  caret-color:var(--green);
+}
+.otp-box:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(34,197,94,.1); }
+.email-sent-badge {
+  display:flex; align-items:center; gap:10px;
+  background:#F0FDF4; border:1px solid rgba(34,197,94,.2);
+  border-radius:14px; padding:14px 18px; margin-bottom:20px;
+}
+.esb-icon { width:36px; height:36px; background:var(--green); border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff; font-size:1rem; }
+.esb-text strong { display:block; font-size:.85rem; font-weight:700; color:var(--black); }
+.esb-text span { font-size:.75rem; color:var(--g3); }
+.resend-btn { background:none; border:none; color:var(--green); font-family:'Plus Jakarta Sans',sans-serif; font-size:.82rem; font-weight:600; cursor:pointer; text-decoration:underline; }
+
+/* ══════════════════════════════════════
+   LIVENESS CHECK
+══════════════════════════════════════ */
+#liveness { background:#000; }
+.lv-overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; z-index:2; }
+.lv-top { padding:56px 24px 0; display:flex; align-items:center; justify-content:space-between; width:100%; }
+.lv-title { font-size:1rem; font-weight:700; color:#fff; }
+.face-frame-wrap { flex:1; display:flex; align-items:center; justify-content:center; width:100%; }
+.face-frame {
+  width:240px; height:300px;
+  position:relative;
+}
+.face-oval {
+  position:absolute; inset:0;
+  border:3px solid var(--green);
+  border-radius:50%;
+  box-shadow:0 0 0 2000px rgba(0,0,0,.55);
+  animation:faceGlow 2s ease-in-out infinite;
+}
+@keyframes faceGlow { 0%,100%{box-shadow:0 0 0 2000px rgba(0,0,0,.55), 0 0 20px rgba(34,197,94,.3)} 50%{box-shadow:0 0 0 2000px rgba(0,0,0,.55), 0 0 40px rgba(34,197,94,.6)} }
+.face-dots {
+  position:absolute; inset:0;
+  border-radius:50%;
+  overflow:hidden;
+}
+.face-dot {
+  position:absolute;
+  width:6px; height:6px;
+  background:var(--green);
+  border-radius:50%;
+  opacity:.7;
+}
+.lv-status {
+  background:rgba(0,0,0,.7);
+  border:1px solid rgba(34,197,94,.3);
+  border-radius:100px;
+  padding:10px 20px;
+  display:flex; align-items:center; gap:8px;
+  color:#fff; font-size:.82rem; font-weight:600;
+  margin-top:20px;
+}
+.lv-status-dot { width:8px; height:8px; background:var(--green); border-radius:50%; animation:blink 1s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+.lv-instructions { padding:20px 24px; }
+.lv-instr-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 0;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  font-size:.82rem; color:rgba(255,255,255,.5);
+}
+.lv-instr-item:last-child { border-bottom:none; }
+.lv-instr-icon { font-size:1rem; }
+.lv-instr-item.done-instr { color:var(--green); }
+.lv-btn-area { padding:0 24px 40px; }
+
+/* Simulated face dots for liveness */
+.face-landmark { position:absolute; width:5px; height:5px; background:rgba(34,197,94,.8); border-radius:50%; }
+
+/* ══════════════════════════════════════
+   SUCCESS / CREDENTIAL CREATED
+══════════════════════════════════════ */
+#cred-created { background:var(--navy); }
+.cc-inner { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center; }
+.cc-ring {
+  width:110px; height:110px;
+  background:var(--green);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:28px;
+  animation:ccPop .5s cubic-bezier(.175,.885,.32,1.275) forwards;
+  box-shadow:0 0 60px rgba(34,197,94,.4);
+}
+@keyframes ccPop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+.cc-ring svg { width:52px; height:52px; stroke:#fff; fill:none; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
+.cc-title { font-size:1.8rem; font-weight:800; color:#fff; letter-spacing:-.04em; margin-bottom:8px; }
+.cc-sub { font-size:.9rem; color:rgba(255,255,255,.45); line-height:1.65; max-width:280px; margin:0 auto 32px; }
+.cc-cred-card {
+  width:100%; background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:20px; padding:20px;
+  display:flex; flex-direction:column; gap:12px;
+  margin-bottom:24px;
+}
+.cc-row { display:flex; align-items:center; justify-content:space-between; }
+.cc-label { font-size:.7rem; color:rgba(255,255,255,.35); text-transform:uppercase; letter-spacing:.1em; font-weight:600; }
+.cc-val { font-size:.85rem; color:#fff; font-weight:700; }
+.cc-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(34,197,94,.15); border:1px solid rgba(34,197,94,.25); border-radius:100px; padding:5px 14px; font-size:.7rem; font-weight:700; color:var(--green); letter-spacing:.08em; text-transform:uppercase; }
+
+/* ══════════════════════════════════════
+   HOME SCREEN
+══════════════════════════════════════ */
+#home { background:var(--bg); }
+.home-hd { background:var(--navy); padding:0 24px 24px; flex-shrink:0; }
+.home-top { display:flex; align-items:center; justify-content:space-between; padding-top:8px; margin-bottom:20px; }
+.hg { font-size:.75rem; color:rgba(255,255,255,.4); font-weight:500; }
+.hn { font-size:1.2rem; font-weight:800; color:#fff; letter-spacing:-.03em; margin-top:2px; }
+.av { width:44px; height:44px; background:var(--green); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:.95rem; font-weight:800; color:#fff; border:none; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; }
+.id-card { background:linear-gradient(135deg, rgba(34,197,94,.15), rgba(34,197,94,.05)); border:1px solid rgba(34,197,94,.2); border-radius:20px; padding:18px 20px; display:flex; align-items:center; justify-content:space-between; }
+.ic-score { font-size:2.2rem; font-weight:800; color:#fff; letter-spacing:-.05em; line-height:1; }
+.ic-lbl { font-size:.65rem; color:rgba(255,255,255,.4); margin-bottom:6px; letter-spacing:.08em; text-transform:uppercase; }
+.ic-slbl { font-size:.7rem; color:rgba(255,255,255,.5); margin-top:4px; }
+.ic-badge { background:var(--green); border-radius:14px; padding:10px 16px; text-align:center; }
+.ic-badge-t { font-size:.6rem; font-weight:700; color:#fff; letter-spacing:.05em; text-transform:uppercase; }
+.sec-hd { display:flex; align-items:center; justify-content:space-between; padding:20px 24px 12px; }
+.sec-t { font-size:.9rem; font-weight:800; color:var(--black); letter-spacing:-.02em; }
+.sec-a { font-size:.78rem; font-weight:600; color:var(--green); cursor:pointer; border:none; background:none; font-family:'Plus Jakarta Sans',sans-serif; }
+.cred-list { display:flex; flex-direction:column; gap:9px; padding:0 24px; }
+.cc { background:#fff; border:1.5px solid var(--g6); border-radius:18px; padding:14px 18px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:border-color .2s; position:relative; overflow:hidden; }
+.cc::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--g6); border-radius:0 2px 2px 0; }
+.cc.v::before { background:var(--green); }
+.ci { width:42px; height:42px; border-radius:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:1rem; }
+.ci.g { background:var(--green-l); color:var(--green); }
+.ci.b { background:#EFF6FF; color:var(--blue); }
+.ci.a { background:#FFFBEB; color:var(--amber); }
+.ci.s { background:var(--g7); color:var(--g3); }
+.ci.p { background:#FAF5FF; color:#9333EA; }
+.ci svg { width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.cb { flex:1; min-width:0; }
+.ct { font-size:.62rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--g4); margin-bottom:2px; }
+.cn { font-size:.9rem; font-weight:700; color:var(--black); letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cd { font-size:.73rem; color:var(--g3); margin-top:1px; }
+.cs { flex-shrink:0; font-size:.65rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; display:flex; align-items:center; gap:4px; }
+.cs.v { color:var(--green); }
+.cs-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+.act-list { display:flex; flex-direction:column; padding:0 24px 8px; }
+.ai { display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--g7); }
+.ai:last-child { border-bottom:none; }
+.ai-icon { width:38px; height:38px; border-radius:12px; background:var(--g7); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:.9rem; }
+.ai-b { flex:1; }
+.ai-n { font-size:.85rem; font-weight:600; color:var(--black); letter-spacing:-.01em; }
+.ai-d { font-size:.72rem; color:var(--g3); margin-top:1px; }
+.ai-t { font-size:.65rem; color:var(--g4); font-weight:500; flex-shrink:0; }
+
+/* ══════════════════════════════════════
+   VERIFICATION REQUEST (The OwnlyMe moment)
+══════════════════════════════════════ */
+#verify-req { background:var(--bg); }
+.vr-header {
+  background:var(--navy); padding:0 24px 28px; flex-shrink:0;
+  position:relative; overflow:hidden;
+}
+.vr-glow { position:absolute; top:-40px; right:-40px; width:200px; height:200px; background:radial-gradient(circle, rgba(34,197,94,.15) 0%, transparent 70%); pointer-events:none; }
+.vr-platform { display:flex; align-items:center; gap:14px; margin-top:16px; }
+.vr-plat-icon { width:52px; height:52px; background:linear-gradient(135deg, #1a2744, #2a3f6b); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; border:1px solid rgba(255,255,255,.1); }
+.vr-plat-info {}
+.vr-plat-name { font-size:1.1rem; font-weight:800; color:#fff; letter-spacing:-.02em; }
+.vr-plat-url { font-size:.75rem; color:rgba(255,255,255,.35); margin-top:2px; }
+.vr-asking { font-size:.75rem; color:rgba(255,255,255,.4); margin-top:16px; margin-bottom:4px; letter-spacing:.04em; text-transform:uppercase; font-weight:600; }
+.vr-request { font-size:1.3rem; font-weight:700; color:#fff; letter-spacing:-.02em; line-height:1.3; }
+.vr-shares { padding:20px 24px; flex-shrink:0; }
+.vr-shares-label { font-size:.68rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--g4); margin-bottom:12px; }
+.vr-share-item { display:flex; align-items:center; gap:12px; padding:12px 16px; background:#fff; border:1.5px solid var(--g6); border-radius:14px; margin-bottom:8px; }
+.vr-share-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.vr-share-icon.g { background:var(--green-l); color:var(--green); font-size:.9rem; }
+.vr-share-name { font-size:.875rem; font-weight:600; color:var(--black); flex:1; }
+.vr-share-val { font-size:.75rem; color:var(--g3); margin-top:2px; }
+.vr-not-shared { padding:16px 24px; flex-shrink:0; }
+.vr-ns-label { font-size:.68rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--g4); margin-bottom:10px; }
+.vr-ns-items { display:flex; flex-wrap:wrap; gap:8px; }
+.vr-ns-tag { background:var(--g7); border-radius:100px; padding:6px 14px; font-size:.72rem; font-weight:600; color:var(--g3); display:flex; align-items:center; gap:5px; }
+.vr-ns-tag::before { content:'✕'; font-size:.6rem; color:var(--g4); }
+.vr-foot { padding:12px 24px 36px; flex-shrink:0; display:flex; flex-direction:column; gap:10px; }
+.vr-note { text-align:center; font-size:.72rem; color:var(--g4); margin-top:4px; display:flex; align-items:center; justify-content:center; gap:4px; }
+.vr-note::before { content:''; }
+
+/* ══════════════════════════════════════
+   VERIFY SUCCESS
+══════════════════════════════════════ */
+#verify-done { background:var(--navy); }
+.vd-inner { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px 24px; text-align:center; }
+.vd-platform { display:flex; align-items:center; gap:12px; margin-bottom:32px; }
+.vd-plat-icon { width:56px; height:56px; background:linear-gradient(135deg,#1a2744,#2a3f6b); border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; border:1px solid rgba(255,255,255,.1); }
+.vd-arrow { width:32px; height:2px; background:var(--green); position:relative; }
+.vd-arrow::after { content:''; position:absolute; right:-1px; top:-3px; width:0; height:0; border-top:4px solid transparent; border-bottom:4px solid transparent; border-left:8px solid var(--green); }
+.vd-ownlyme { width:56px; height:56px; background:var(--green); border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; box-shadow:0 0 30px rgba(34,197,94,.4); }
+.vd-check { width:100px; height:100px; background:var(--green); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 60px rgba(34,197,94,.5); margin-bottom:24px; animation:vdPop .5s cubic-bezier(.175,.885,.32,1.275) forwards; }
+@keyframes vdPop { from{transform:scale(0)} to{transform:scale(1)} }
+.vd-check svg { width:48px; height:48px; stroke:#fff; fill:none; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
+.vd-title { font-size:1.8rem; font-weight:800; color:#fff; letter-spacing:-.04em; margin-bottom:8px; }
+.vd-sub { font-size:.9rem; color:rgba(255,255,255,.45); line-height:1.65; max-width:270px; margin:0 auto 32px; }
+.vd-stats { width:100%; display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px; background:rgba(255,255,255,.06); border-radius:16px; overflow:hidden; margin-bottom:28px; }
+.vd-stat { background:rgba(255,255,255,.04); padding:16px 12px; text-align:center; }
+.vd-stat-n { font-size:1.2rem; font-weight:800; color:var(--green); letter-spacing:-.03em; }
+.vd-stat-l { font-size:.62rem; color:rgba(255,255,255,.35); margin-top:3px; letter-spacing:.06em; text-transform:uppercase; }
+
+/* ══════════════════════════════════════
+   ID SUMMARY
+══════════════════════════════════════ */
+#idsummary { background:var(--bg); }
+.id-hero { background:var(--navy); padding:0 24px 28px; flex-shrink:0; }
+.id-hero-top { display:flex; align-items:center; justify-content:space-between; padding-top:8px; margin-bottom:20px; }
+.id-screen-t { font-size:1rem; font-weight:800; color:#fff; letter-spacing:-.02em; }
+.qr-btn { width:40px; height:40px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.12); border-radius:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#fff; border:none; }
+.ring-wrap { position:relative; width:120px; height:120px; }
+.ring-wrap svg { position:absolute; inset:0; transform:rotate(-90deg); }
+.ring-bg { fill:none; stroke:rgba(255,255,255,.08); stroke-width:8; }
+.ring-fill { fill:none; stroke:var(--green); stroke-width:8; stroke-linecap:round; stroke-dasharray:339; stroke-dashoffset:34; }
+.ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.ring-n { font-size:2rem; font-weight:800; color:#fff; letter-spacing:-.06em; line-height:1; }
+.ring-max { font-size:.62rem; color:rgba(255,255,255,.35); font-weight:600; }
+.id-score-wrap { display:flex; flex-direction:column; align-items:center; gap:6px; }
+.id-score-lbl { font-size:.72rem; font-weight:700; color:var(--green); letter-spacing:.08em; text-transform:uppercase; }
+.id-vbadge { background:rgba(34,197,94,.15); border:1px solid rgba(34,197,94,.25); border-radius:100px; padding:7px 18px; display:inline-flex; align-items:center; gap:5px; margin-top:10px; font-size:.72rem; font-weight:700; color:var(--green); letter-spacing:.06em; text-transform:uppercase; }
+.id-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:18px 24px; flex-shrink:0; }
+.id-card { background:#fff; border:1.5px solid var(--g6); border-radius:16px; padding:15px; }
+.id-card-l { font-size:.6rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--g4); margin-bottom:5px; }
+.id-card-v { font-size:.88rem; font-weight:700; color:var(--black); letter-spacing:-.01em; }
+.id-card-s { font-size:.7rem; color:var(--g3); margin-top:2px; }
+
+/* ══════════════════════════════════════
+   WALLET
+══════════════════════════════════════ */
+#wallet { background:var(--bg); }
+.w-hd { display:flex; align-items:center; justify-content:space-between; padding:12px 24px 0; flex-shrink:0; }
+.w-t { font-size:1.1rem; font-weight:800; color:var(--black); letter-spacing:-.03em; }
+.w-add { width:36px; height:36px; background:var(--green); border:none; border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#fff; }
+.w-add svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2.5; stroke-linecap:round; }
+.tabs { display:flex; gap:8px; padding:14px 24px 0; flex-shrink:0; }
+.tab { padding:7px 14px; border-radius:100px; border:1.5px solid var(--g6); background:transparent; font-family:'Plus Jakarta Sans',sans-serif; font-size:.75rem; font-weight:600; color:var(--g3); cursor:pointer; transition:all .2s; }
+.tab.on { background:var(--black); border-color:var(--black); color:#fff; }
+.feat-cred { background:var(--navy); margin:18px 24px 0; border-radius:24px; padding:22px; position:relative; overflow:hidden; flex-shrink:0; }
+.fc-glow { position:absolute; right:-20px; top:-20px; width:140px; height:140px; background:radial-gradient(circle, rgba(34,197,94,.2) 0%, transparent 70%); pointer-events:none; }
+.fc-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:18px; }
+.fc-tag { font-size:.6rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.35); }
+.fc-status { background:rgba(34,197,94,.2); border:1px solid rgba(34,197,94,.3); border-radius:100px; padding:4px 12px; font-size:.62rem; font-weight:700; color:var(--green); letter-spacing:.08em; text-transform:uppercase; }
+.fc-title { font-size:1.35rem; font-weight:800; color:#fff; letter-spacing:-.03em; margin-bottom:4px; }
+.fc-sub { font-size:.75rem; color:rgba(255,255,255,.4); }
+.fc-bottom { display:flex; align-items:center; justify-content:space-between; margin-top:18px; padding-top:14px; border-top:1px solid rgba(255,255,255,.08); }
+.fc-b-lbl { font-size:.65rem; color:rgba(255,255,255,.3); }
+.fc-b-val { font-size:.85rem; font-weight:700; color:rgba(255,255,255,.7); margin-top:2px; }
+.fc-b-val.g { color:var(--green); }
+
+/* ══════════════════════════════════════
+   SETTINGS
+══════════════════════════════════════ */
+#settings { background:var(--bg); }
+.set-hd { padding:12px 24px 0; flex-shrink:0; }
+.set-t { font-size:1.1rem; font-weight:800; color:var(--black); letter-spacing:-.03em; margin-top:8px; margin-bottom:4px; }
+.set-profile { background:#fff; border:1.5px solid var(--g6); border-radius:20px; margin:14px 24px; padding:18px 20px; display:flex; align-items:center; gap:14px; flex-shrink:0; }
+.set-av { width:54px; height:54px; background:var(--navy); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; font-weight:800; color:#fff; flex-shrink:0; }
+.set-name { font-size:.95rem; font-weight:800; color:var(--black); letter-spacing:-.02em; }
+.set-handle { font-size:.78rem; color:var(--green); font-weight:600; margin-top:2px; }
+.set-badge { margin-left:auto; background:var(--green-l); border:1px solid rgba(34,197,94,.2); border-radius:8px; padding:5px 10px; font-size:.65rem; font-weight:700; color:var(--green); letter-spacing:.06em; text-transform:uppercase; }
+.set-sec { padding:0 24px; margin-bottom:20px; flex-shrink:0; }
+.set-sec-lbl { font-size:.65rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--g4); margin-bottom:10px; padding-left:2px; }
+.set-grp { background:#fff; border:1.5px solid var(--g6); border-radius:18px; overflow:hidden; }
+.set-row { display:flex; align-items:center; padding:14px 18px; gap:12px; cursor:pointer; transition:background .15s; border-bottom:1px solid var(--g7); }
+.set-row:last-child { border-bottom:none; }
+.set-row:active { background:var(--g7); }
+.sr-ic { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.sr-ic.g { background:var(--green-l); color:var(--green); }
+.sr-ic.b { background:#EFF6FF; color:var(--blue); }
+.sr-ic.a { background:#FFFBEB; color:var(--amber); }
+.sr-ic.r { background:#FEF2F2; color:var(--red); }
+.sr-ic.s { background:var(--g7); color:var(--g3); }
+.sr-ic svg { width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.sr-b { flex:1; }
+.sr-n { font-size:.85rem; font-weight:600; color:var(--black); letter-spacing:-.01em; }
+.sr-s { font-size:.7rem; color:var(--g3); margin-top:1px; }
+.sr-r { display:flex; align-items:center; gap:8px; color:var(--g4); }
+.sr-r svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+.sr-badge { background:var(--green); color:#fff; border-radius:100px; padding:2px 8px; font-size:.62rem; font-weight:700; }
+.tgl { width:46px; height:26px; background:var(--green); border-radius:13px; position:relative; cursor:pointer; transition:background .2s; flex-shrink:0; }
+.tgl::after { content:''; position:absolute; width:20px; height:20px; background:#fff; border-radius:50%; top:3px; left:3px; transition:transform .2s; box-shadow:0 1px 4px rgba(0,0,0,.15); }
+.tgl.on::after { transform:translateX(20px); }
+.tgl.off { background:var(--g5); }
+.vl-bar { margin:0 24px 24px; background:var(--navy); border-radius:16px; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.vl-t { font-size:.75rem; font-weight:700; color:rgba(255,255,255,.4); }
+.vl-n { font-size:.88rem; font-weight:800; color:#fff; letter-spacing:-.02em; margin-top:2px; }
+.vl-arr { width:30px; height:30px; background:rgba(255,255,255,.1); border-radius:9px; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.5); }
+.vl-arr svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+
+/* ══════════════════════════════════════
+   BIO TOGGLE
+══════════════════════════════════════ */
+.bio-tgl { display:flex; align-items:center; justify-content:space-between; background:#fff; border:1.5px solid var(--g6); border-radius:16px; padding:14px 18px; margin:14px 24px 0; flex-shrink:0; }
+.bio-l { display:flex; align-items:center; gap:12px; }
+.bio-ic { width:38px; height:38px; background:var(--green-l); border-radius:12px; display:flex; align-items:center; justify-content:center; color:var(--green); }
+.bio-ic svg { width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; }
+.bio-tx strong { display:block; font-size:.85rem; font-weight:700; color:var(--black); }
+.bio-tx span { font-size:.72rem; color:var(--g3); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeSlideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.fs-1 { animation:fadeSlideUp .5s ease forwards .1s; opacity:0; }
+.fs-2 { animation:fadeSlideUp .5s ease forwards .2s; opacity:0; }
+.fs-3 { animation:fadeSlideUp .5s ease forwards .35s; opacity:0; }
+.fs-4 { animation:fadeSlideUp .5s ease forwards .5s; opacity:0; }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+<!-- ════════════ SPLASH ════════════ -->
+<div class="screen active" id="splash">
+  <div style="background:var(--navy);flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+    <div class="sp-glow"></div>
+    <div class="sp-logo">
+      <div class="sp-icon">
+        <svg viewBox="0 0 48 48"><path d="M24 6C13.8 6 5.5 14.3 5.5 24.5S13.8 43 24 43 42.5 34.7 42.5 24.5 34.2 6 24 6zm0 6a6 6 0 110 12 6 6 0 010-12zm0 23.5c-5 0-9.4-2.55-12-6.43.05-4 8-6.2 12-6.2s11.95 2.2 12 6.2c-2.6 3.88-7 6.43-12 6.43z"/></svg>
+      </div>
+      <div class="sp-name">Ownly<span>Me</span></div>
+      <div class="sp-tag">Your identity. Your control.</div>
+    </div>
+    <div class="sp-btn">
+      <button class="btn btn-p fs-4" onclick="goTo('username')" style="border-radius:16px;">Get started — it's free</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ USERNAME ════════════ -->
+<div class="screen" id="username">
+  <div class="sb"><span class="sb-t" id="clock1">9:41</span><span class="sb-i">●●● 100%</span></div>
+  <div class="ob-hd"><button class="back-btn" onclick="goBack()"><svg viewBox="0 0 18 18"><polyline points="11 4 6 9 11 14"/></svg></button></div>
+  <div class="ob-body">
+    <div class="prog"><span class="prog-dot on"></span><span class="prog-dot"></span><span class="prog-dot"></span><span class="prog-dot"></span><span class="prog-dot"></span><span class="prog-dot"></span></div>
+    <div class="ey">Step 1 of 6</div>
+    <div class="tt">Claim your<br><em>sovereign</em> handle.</div>
+    <div class="su">This is how you'll be identified across every platform that uses OwnlyMe.</div>
+    <div class="fl">
+      <div class="fl-l">Your handle</div>
+      <div class="fi-wrap"><span class="fi-pre">@</span><input class="fi pre" type="text" placeholder="yourname" id="uInput" oninput="checkU()"></div>
+      <div class="fi-hint" id="uHint">Letters, numbers, underscores. Min 3 chars.</div>
+    </div>
+    <div class="fl">
+      <div class="fl-l">Your identity address</div>
+      <input class="fi" type="text" value="@username.me" readonly style="color:var(--g4);background:var(--g8);">
+      <div class="fi-hint">This becomes your public OwnlyMe address.</div>
+    </div>
+  </div>
+  <div class="ob-foot">
+    <button class="btn btn-p" id="uBtn" onclick="goTo('password')" disabled>Reserve handle →</button>
+  </div>
+</div>
+
+<!-- ════════════ PASSWORD ════════════ -->
+<div class="screen" id="password">
+  <div class="sb"><span class="sb-t">9:41</span><span class="sb-i">●●● 100%</span></div>
+  <div class="ob-hd"><button class="back-btn" onclick="goBack()"><svg viewBox="0 0 18 18"><polyline points="11 4 6 9 11 14"/></svg></button></div>
+  <div class="ob-body">
+    <div class="prog"><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot"></span><span class="prog-dot"></span><span class="prog-dot"></span><span class="prog-dot"></span></div>
+    <div class="ey">Step 2 of 6</div>
+    <div class="tt">Secure your<br><em>Sovereignty.</em></div>
+    <div class="su">Create a master password — the ultimate key to your digital vault.</div>
+    <div class="fl">
+      <div class="fl-l">New password</div>
+      <div class="fi-wrap">
+        <input class="fi" type="password" placeholder="Enter new password" id="pwInput" oninput="checkPW()">
+        <span class="fi-suf" onclick="togglePw('pwInput')"><svg viewBox="0 0 20 20"><path d="M10 4C5 4 1.73 10 1.73 10S5 16 10 16s8.27-6 8.27-6S15 4 10 4z" stroke-width="1.5"/><circle cx="10" cy="10" r="3" stroke-width="1.5"/></svg></span>
+      </div>
+      <div class="pw-bars"><div class="pw-b" id="pb1"></div><div class="pw-b" id="pb2"></div><div class="pw-b" id="pb3"></div><div class="pw-b" id="pb4"></div></div>
+      <div class="pw-rs">
+        <div class="pw-r" id="req1"><div class="pw-rd"></div> Minimum 12 characters</div>
+        <div class="pw-r" id="req2"><div class="pw-rd"></div> At least one symbol</div>
+        <div class="pw-r" id="req3"><div class="pw-rd"></div> One uppercase letter</div>
+      </div>
+    </div>
+    <div class="fl" style="margin-top:14px;">
+      <div class="fl-l">Confirm password</div>
+      <div class="fi-wrap">
+        <input class="fi" type="password" placeholder="Repeat your password" id="pw2">
+        <span class="fi-suf" onclick="togglePw('pw2')"><svg viewBox="0 0 20 20"><path d="M10 4C5 4 1.73 10 1.73 10S5 16 10 16s8.27-6 8.27-6S15 4 10 4z" stroke-width="1.5"/><circle cx="10" cy="10" r="3" stroke-width="1.5"/></svg></span>
+      </div>
+    </div>
+  </div>
+  <div class="ob-foot">
+    <button class="btn btn-p" onclick="goTo('pin')">Initialise vault →</button>
+  </div>
+</div>
+
+<!-- ════════════ PIN ════════════ -->
+<div class="screen" id="pin">
+  <div class="sb"><span class="sb-t">9:41</span><span class="sb-i">●●● 100%</span></div>
+  <div class="ob-hd"><button class="back-btn" onclick="goBack()"><svg viewBox="0 0 18 18"><polyline points="11 4 6 9 11 14"/></svg></button></div>
+  <div class="ob-body">
+    <div class="prog"><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot"></span><span class="prog-dot"></span><span class="prog-dot"></span></div>
+    <div class="ey">Step 3 of 6</div>
+    <div class="tt">Secure Your<br><em>Vault.</em></div>
+    <div class="su">Set a 6-digit PIN to protect your identity credentials.</div>
+    <div class="pin-dots"><div class="pd" id="pd0"></div><div class="pd" id="pd1"></div><div class="pd" id="pd2"></div><div class="pd" id="pd3"></div><div class="pd" id="pd4"></div><div class="pd" id="pd5"></div></div>
+  </div>
+  <div class="numpad">
+    <button class="nb" onclick="pinP('1')">1</button>
+    <button class="nb" onclick="pinP('2')">2<div class="nb-sub">ABC</div></button>
+    <button class="nb" onclick="pinP('3')">3<div class="nb-sub">DEF</div></button>
+    <button class="nb" onclick="pinP('4')">4<div class="nb-sub">GHI</div></button>
+    <button class="nb" onclick="pinP('5')">5<div class="nb-sub">JKL</div></button>
+    <button class="nb" onclick="pinP('6')">6<div class="nb-sub">MNO</div></button>
+    <button class="nb" onclick="pinP('7')">7<div class="nb-sub">PQRS</div></button>
+    <button class="nb" onclick="pinP('8')">8<div class="nb-sub">TUV</div></button>
+    <button class="nb" onclick="pinP('9')">9<div class="nb-sub">WXYZ</div></button>
+    <button class="nb empty"></button>
+    <button class="nb" onclick="pinP('0')">0</button>
+    <button class="nb del" onclick="pinDel()"><svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 002-2V6a2 2 0 00-2-2z"/><line x1="18" y1="9" x2="13" y2="14"/><line x1="13" y1="9" x2="18" y2="14"/></svg></button>
+  </div>
+  <div class="bio-tgl">
+    <div class="bio-l">
+      <div class="bio-ic"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" stroke="none" fill="currentColor"/></svg></div>
+      <div class="bio-tx"><strong>Enable Biometrics</strong><span>Use Face ID or fingerprint</span></div>
+    </div>
+    <div class="tgl on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+  </div>
+  <div style="padding:14px 24px 32px;flex-shrink:0;">
+    <button class="btn btn-p" id="pinBtn" onclick="goTo('doctype')" disabled>Continue →</button>
+  </div>
+</div>
+
+<!-- ════════════ DOC TYPE ════════════ -->
+<div class="screen" id="doctype">
+  <div class="sb"><span class="sb-t">9:41</span><span class="sb-i">●●● 100%</span></div>
+  <div class="ob-hd"><button class="back-btn" onclick="goBack()"><svg viewBox="0 0 18 18"><polyline points="11 4 6 9 11 14"/></svg></button></div>
+  <div class="ob-body">
+    <div class="prog"><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot"></span><span class="prog-dot"></span></div>
+    <div class="ey">Step 4 of 6 · KYC Verification</div>
+    <div class="tt">Verify your<br><em>identity.</em></div>
+    <div class="su">Choose your document type. We'll scan it once — it never leaves your device.</div>
+  </div>
+  <div class="doc-grid">
+    <div class="doc-opt sel" id="doc-passport" onclick="selectDoc(this)">
+      <div class="doc-icon g"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M7 20c0-2.76 2.24-5 5-5s5 2.24 5 5"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">Passport</div>
+        <div class="doc-hint">Most countries · Highest trust level</div>
+      </div>
+      <div class="doc-check"></div>
+    </div>
+    <div class="doc-opt" id="doc-driving" onclick="selectDoc(this)">
+      <div class="doc-icon b"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2"/><path d="M13 11h5M13 15h3"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">Driving Licence</div>
+        <div class="doc-hint">UK, EU, USA, AUS · Age + address</div>
+      </div>
+      <div class="doc-check"></div>
+    </div>
+    <div class="doc-opt" id="doc-national" onclick="selectDoc(this)">
+      <div class="doc-icon a"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="9" x2="10" y2="9"/><line x1="6" y1="13" x2="14" y2="13"/><line x1="6" y1="17" x2="10" y2="17"/><rect x="14" y="8" width="5" height="6" rx="1"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">National ID Card</div>
+        <div class="doc-hint">EU countries · eIDAS 2.0 compatible</div>
+      </div>
+      <div class="doc-check"></div>
+    </div>
+  </div>
+  <div class="ob-foot" style="margin-top:auto;padding-top:20px;">
+    <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:14px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--g4)" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span style="font-size:.72rem;color:var(--g4);">Document data stays on your device only</span>
+    </div>
+    <button class="btn btn-p" onclick="goTo('docscan')">Scan document →</button>
+  </div>
+</div>
+
+<!-- ════════════ DOC SCAN ════════════ -->
+<div class="screen" id="docscan" style="background:#000;">
+  <div class="cam-top-bar">
+    <button class="cam-top-bar-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <span style="color:#fff;font-size:.85rem;font-weight:700;">Scan Passport</span>
+    <button class="cam-flash"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></button>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">
+    <div class="cam-bg" style="position:absolute;inset:0;">
+      <div style="width:100%;height:100%;background:linear-gradient(180deg,#0a0a0a 0%,#1a1a2e 50%,#0a0a0a 100%);"></div>
+    </div>
+    <div class="cam-overlay">
+      <div class="scan-frame">
+        <div class="cam-doc-preview">
+          <div>
+            <div style="width:28px;height:20px;background:rgba(255,255,255,.15);border-radius:3px;display:flex;align-items:center;justify-content:center;"><span style="font-size:.5rem;font-weight:800;color:rgba(255,255,255,.7);letter-spacing:.05em;">GBR</span></div>
+            <div class="doc-preview-title">United Kingdom of Great Britain · Passport</div>
+          </div>
+          <div>
+            <div class="doc-preview-name">THORNE, ALEXANDER J</div>
+            <div class="doc-preview-num">Passport No: 796 4521 37</div>
+            <div class="doc-preview-mrz">P&lt;GBRTHO​RNE&lt;&lt;ALEXANDER&lt;JAMES&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;<br>7964521374GBR9203247M2510198&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;6</div>
+          </div>
+        </div>
+        <div class="sf-corner sf-tl"></div>
+        <div class="sf-corner sf-tr"></div>
+        <div class="sf-corner sf-bl"></div>
+        <div class="sf-corner sf-br"></div>
+        <div class="scan-line"></div>
+      </div>
+      <div class="cam-label">Hold still — scanning</div>
+      <div class="cam-sub">Align the document within the frame</div>
+    </div>
+  </div>
+  <div class="cam-bottom">
+    <div class="cam-tip">Keep document flat and in good lighting</div>
+    <button class="cam-shutter" onclick="goTo('processing')"><div class="cam-shutter-inner"></div></button>
+    <div style="color:rgba(255,255,255,.3);font-size:.7rem;">Tap to capture · Auto in 3s</div>
+  </div>
+</div>
+
+<!-- ════════════ PROCESSING ════════════ -->
+<div class="screen" id="processing" style="background:var(--navy);">
+  <div class="sb dk"><span class="sb-t" style="color:#fff;">9:41</span><span class="sb-i" style="color:#fff;">●●● 100%</span></div>
+  <div class="proc-inner">
+    <div class="proc-ring">
+      <svg viewBox="0 0 100 100" width="100" height="100">
+        <circle class="proc-ring-bg" cx="50" cy="50" r="44"/>
+        <circle class="proc-ring-fill" cx="50" cy="50" r="44"/>
+      </svg>
+      <div class="proc-icon"><svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3H9a2 2 0 00-2 2v26a2 2 0 002 2h18a2 2 0 002-2V12z"/><polyline points="21 3 21 12 29 12"/><line x1="13" y1="19" x2="23" y2="19"/><line x1="13" y1="24" x2="20" y2="24"/></svg></div>
+    </div>
+    <div class="proc-title">Verifying document</div>
+    <div class="proc-sub">Your data never leaves your device. We're confirming authenticity.</div>
+    <div class="proc-steps" id="procSteps">
+      <div class="proc-step active-step" id="ps1">
+        <div class="proc-step-icon active">⟳</div>
+        <div class="proc-step-label">Reading document data</div>
+      </div>
+      <div class="proc-step" id="ps2">
+        <div class="proc-step-icon pending">○</div>
+        <div class="proc-step-label">Checking authenticity</div>
+      </div>
+      <div class="proc-step" id="ps3">
+        <div class="proc-step-icon pending">○</div>
+        <div class="proc-step-label">Extracting verified claims</div>
+      </div>
+      <div class="proc-step" id="ps4">
+        <div class="proc-step-icon pending">○</div>
+        <div class="proc-step-label">Encrypting to your vault</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ EMAIL ENTRY ════════════ -->
+<div class="screen" id="email-entry">
+  <div class="sb"><span class="sb-t">9:41</span><span class="sb-i">●●● 100%</span></div>
+  <div class="ob-hd"><button class="back-btn" onclick="goBack()"><svg viewBox="0 0 18 18"><polyline points="11 4 6 9 11 14"/></svg></button></div>
+  <div class="ob-body">
+    <div class="prog"><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot"></span></div>
+    <div class="ey">Step 5 of 6 · Email Verification</div>
+    <div class="tt">Verify your<br><em>email.</em></div>
+    <div class="su">We'll send a one-time code. This links your email to your verified credential.</div>
+    <div class="fl">
+      <div class="fl-l">Email address</div>
+      <div class="fi-wrap">
+        <input class="fi" type="email" placeholder="you@example.com" id="emailInput" value="a.thorne@example.com">
+      </div>
+    </div>
+    <div style="background:var(--g7);border-radius:14px;padding:14px 16px;display:flex;align-items:flex-start;gap:10px;margin-top:4px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--g3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      <div style="font-size:.78rem;color:var(--g3);line-height:1.6;">Your email is never shared with platforms. It's used only to anchor your credential — you confirm with a tap, not a full disclosure.</div>
+    </div>
+  </div>
+  <div class="ob-foot">
+    <button class="btn btn-p" onclick="goTo('email-otp')">Send verification code →</button>
+  </div>
+</div>
+
+<!-- ════════════ EMAIL OTP ════════════ -->
+<div class="screen" id="email-otp">
+  <div class="sb"><span class="sb-t">9:41</span><span class="sb-i">●●● 100%</span></div>
+  <div class="ob-hd"><button class="back-btn" onclick="goBack()"><svg viewBox="0 0 18 18"><polyline points="11 4 6 9 11 14"/></svg></button></div>
+  <div class="ob-body">
+    <div class="prog"><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot"></span></div>
+    <div class="ey">Step 5 of 6 · Confirm code</div>
+    <div class="tt">Check your<br><em>inbox.</em></div>
+    <div class="email-sent-badge">
+      <div class="esb-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2-2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+      <div class="esb-text"><strong>Code sent</strong><span>a.thorne@example.com</span></div>
+    </div>
+    <div class="su" style="margin-bottom:8px;">Enter the 6-digit code from your email. Valid for 10 minutes.</div>
+    <div class="otp-row">
+      <input class="otp-box" type="text" maxlength="1" id="otp0" oninput="otpNext(this,0)">
+      <input class="otp-box" type="text" maxlength="1" id="otp1" oninput="otpNext(this,1)">
+      <input class="otp-box" type="text" maxlength="1" id="otp2" oninput="otpNext(this,2)">
+      <input class="otp-box" type="text" maxlength="1" id="otp3" oninput="otpNext(this,3)">
+      <input class="otp-box" type="text" maxlength="1" id="otp4" oninput="otpNext(this,4)">
+      <input class="otp-box" type="text" maxlength="1" id="otp5" oninput="otpNext(this,5)">
+    </div>
+    <div style="text-align:center;font-size:.78rem;color:var(--g3);margin-top:12px;">
+      Didn't get it? <button class="resend-btn">Resend code</button>
+    </div>
+  </div>
+  <div class="ob-foot">
+    <button class="btn btn-p" onclick="goTo('liveness-intro')">Verify email →</button>
+  </div>
+</div>
+
+<!-- ════════════ LIVENESS INTRO ════════════ -->
+<div class="screen" id="liveness-intro">
+  <div class="sb"><span class="sb-t">9:41</span><span class="sb-i">●●● 100%</span></div>
+  <div class="ob-hd"><button class="back-btn" onclick="goBack()"><svg viewBox="0 0 18 18"><polyline points="11 4 6 9 11 14"/></svg></button></div>
+  <div class="ob-body" style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+    <div class="prog" style="width:100%;"><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot on"></span><span class="prog-dot on"></span></div>
+    <div class="ey">Step 6 of 6 · Liveness Check</div>
+    <div style="width:100px;height:100px;background:var(--green-l);border-radius:32px;display:flex;align-items:center;justify-content:center;margin:16px auto 20px;box-shadow:0 0 0 12px rgba(34,197,94,.08);"><svg width="52" height="52" viewBox="0 0 52 52" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="26" cy="18" r="10"/><path d="M8 46c0-9.94 8.06-18 18-18s18 8.06 18 18"/></svg></div>
+    <div class="tt" style="font-size:1.7rem;">Last step.<br><em>Stay still.</em></div>
+    <div class="su" style="margin-top:12px;">We confirm you're a real person — not a photo or screen. Takes 5 seconds.</div>
+  </div>
+  <div style="padding:0 24px;flex-shrink:0;">
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--g7);border-radius:14px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--g3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+        <span style="font-size:.82rem;color:var(--g3);">Good lighting — face the camera directly</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--g7);border-radius:14px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--g3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        <span style="font-size:.82rem;color:var(--g3);">Remove glasses or hat if possible</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--g7);border-radius:14px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        <span style="font-size:.82rem;color:var(--g3);">Your image is never stored or shared</span>
+      </div>
+    </div>
+  </div>
+  <div class="ob-foot">
+    <button class="btn btn-p" onclick="goTo('liveness')">Start liveness check →</button>
+  </div>
+</div>
+
+<!-- ════════════ LIVENESS SCAN ════════════ -->
+<div class="screen" id="liveness" style="background:#000;">
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,#050510 0%,#0a0a1a 100%);"></div>
+  <div class="lv-overlay">
+    <div class="lv-top">
+      <button class="cam-top-bar-btn" onclick="goBack()"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <span class="lv-title">Liveness Check</span>
+      <div style="width:40px;"></div>
+    </div>
+    <div class="face-frame-wrap">
+      <div class="face-frame">
+        <div class="face-oval"></div>
+        <!-- Simulated face landmarks -->
+        <div class="face-landmark" style="top:38%;left:34%;animation:dotPulse 2s ease-in-out infinite;"></div>
+        <div class="face-landmark" style="top:38%;left:62%;animation:dotPulse 2s ease-in-out infinite .2s;"></div>
+        <div class="face-landmark" style="top:52%;left:50%;animation:dotPulse 2s ease-in-out infinite .4s;"></div>
+        <div class="face-landmark" style="top:62%;left:40%;animation:dotPulse 2s ease-in-out infinite .1s;"></div>
+        <div class="face-landmark" style="top:62%;left:60%;animation:dotPulse 2s ease-in-out infinite .3s;"></div>
+        <div class="face-landmark" style="top:30%;left:50%;animation:dotPulse 2s ease-in-out infinite .5s;"></div>
+        <div class="face-landmark" style="top:72%;left:35%;animation:dotPulse 2s ease-in-out infinite .15s;"></div>
+        <div class="face-landmark" style="top:72%;left:65%;animation:dotPulse 2s ease-in-out infinite .35s;"></div>
+      </div>
+    </div>
+    <div class="lv-status">
+      <div class="lv-status-dot"></div>
+      <span>Look directly at the camera</span>
+    </div>
+    <div class="lv-instructions">
+      <div class="lv-instr-item done-instr">
+        <span class="lv-instr-icon">✓</span>
+        <span>Face detected</span>
+      </div>
+      <div class="lv-instr-item done-instr">
+        <span class="lv-instr-icon">✓</span>
+        <span>Good lighting</span>
+      </div>
+      <div class="lv-instr-item" id="lv3">
+        <span class="lv-instr-icon">◎</span>
+        <span>Blink detection</span>
+      </div>
+      <div class="lv-instr-item" id="lv4">
+        <span class="lv-instr-icon">◎</span>
+        <span>Liveness confirmed</span>
+      </div>
+    </div>
+    <div class="lv-btn-area" style="width:100%;">
+      <button class="btn btn-p" style="border-radius:14px;" onclick="goTo('liveness-processing')">Complete check →</button>
+    </div>
+  </div>
+</div>
+<style>
+@keyframes dotPulse { 0%,100%{opacity:.4;transform:scale(1)} 50%{opacity:1;transform:scale(1.5)} }
+</style>
+
+<!-- ════════════ LIVENESS PROCESSING ════════════ -->
+<div class="screen" id="liveness-processing" style="background:var(--navy);">
+  <div class="sb dk"><span class="sb-t" style="color:#fff;">9:41</span><span class="sb-i" style="color:#fff;">●●● 100%</span></div>
+  <div class="proc-inner">
+    <div class="proc-ring">
+      <svg viewBox="0 0 100 100" width="100" height="100">
+        <circle class="proc-ring-bg" cx="50" cy="50" r="44"/>
+        <circle class="proc-ring-fill" cx="50" cy="50" r="44"/>
+      </svg>
+      <div class="proc-icon"><svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="14" r="6"/><path d="M6 32c0-6.627 5.373-12 12-12s12 5.373 12 12"/><path d="M3 8V5a2 2 0 012-2h3M28 3h3a2 2 0 012 2v3M31 28v3a2 2 0 01-2 2h-3M8 31H5a2 2 0 01-2-2v-3"/></svg></div>
+    </div>
+    <div class="proc-title">Confirming liveness</div>
+    <div class="proc-sub">Verifying you're a real person. No biometric data is stored or transmitted.</div>
+    <div class="proc-steps">
+      <div class="proc-step active-step" id="lps1">
+        <div class="proc-step-icon active">⟳</div>
+        <div class="proc-step-label">Analysing facial geometry</div>
+      </div>
+      <div class="proc-step" id="lps2">
+        <div class="proc-step-icon pending">○</div>
+        <div class="proc-step-label">Confirming live presence</div>
+      </div>
+      <div class="proc-step" id="lps3">
+        <div class="proc-step-icon pending">○</div>
+        <div class="proc-step-label">Matching document photo</div>
+      </div>
+      <div class="proc-step" id="lps4">
+        <div class="proc-step-icon pending">○</div>
+        <div class="proc-step-label">Creating your credential</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ CREDENTIAL CREATED ════════════ -->
+<div class="screen" id="cred-created" style="background:var(--navy);">
+  <div class="sb dk"><span class="sb-t" style="color:#fff;">9:41</span><span class="sb-i" style="color:#fff;">●●● 100%</span></div>
+  <div class="cc-inner">
+    <div class="cc-ring">
+      <svg viewBox="0 0 52 52"><polyline points="14 26 22 34 38 18"/></svg>
+    </div>
+    <div class="cc-title" style="animation:fadeSlideUp .4s ease forwards .3s;opacity:0;">Identity verified.</div>
+    <div class="cc-sub" style="animation:fadeSlideUp .4s ease forwards .5s;opacity:0;">Your OwnlyMe credential is live. One tap to verify everywhere — nothing shared but the answer they asked for.</div>
+    <div class="cc-cred-card" style="animation:fadeSlideUp .4s ease forwards .7s;opacity:0;text-align:left;">
+      <div class="cc-row">
+        <div class="cc-label">Name</div><div class="cc-val">Alexander J. Thorne</div>
+      </div>
+      <div style="height:1px;background:rgba(255,255,255,.07);"></div>
+      <div class="cc-row">
+        <div class="cc-label">Age status</div><div style="display:flex;align-items:center;gap:6px;"><span style="font-size:.85rem;font-weight:700;color:var(--green);">OVER 21</span></div>
+      </div>
+      <div style="height:1px;background:rgba(255,255,255,.07);"></div>
+      <div class="cc-row">
+        <div class="cc-label">KYC level</div><div class="cc-val">Full · Tier 3</div>
+      </div>
+      <div style="height:1px;background:rgba(255,255,255,.07);"></div>
+      <div class="cc-row">
+        <div class="cc-label">AML status</div><div style="color:var(--green);font-size:.85rem;font-weight:700;">Cleared</div>
+      </div>
+      <div style="height:1px;background:rgba(255,255,255,.07);"></div>
+      <div class="cc-row">
+        <div class="cc-label">Identity score</div><div class="cc-val">980 / 1000 · Premium</div>
+      </div>
+    </div>
+    <div class="cc-badge" style="animation:fadeSlideUp .4s ease forwards .9s;opacity:0;">✓ Anchored on-chain · W3C VC</div>
+  </div>
+  <div style="padding:16px 24px 36px;flex-shrink:0;display:flex;flex-direction:column;gap:10px;animation:fadeSlideUp .4s ease forwards 1.1s;opacity:0;">
+    <button class="btn btn-p" onclick="goTo('home')">Go to my identity →</button>
+    <button class="btn btn-s" onclick="goTo('verify-req')">See how verification works</button>
+  </div>
+</div>
+
+<!-- ════════════ VERIFY REQUEST ════════════ (The OwnlyMe moment) -->
+<div class="screen" id="verify-req">
+  <div class="sb"><span class="sb-t">9:41</span><span class="sb-i">●●● 100%</span></div>
+  <div class="vr-header">
+    <div class="vr-glow"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding-top:8px;margin-bottom:20px;">
+      <div style="font-size:.75rem;color:rgba(255,255,255,.4);font-weight:600;letter-spacing:.06em;text-transform:uppercase;">Verification request</div>
+      <div style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.25);border-radius:100px;padding:4px 12px;font-size:.65rem;font-weight:700;color:var(--green);"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> Encrypted</div>
+    </div>
+    <div class="vr-platform">
+      <div class="vr-plat-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="4"/><line x1="8" y1="12" x2="12" y2="12"/><line x1="10" y1="10" x2="10" y2="14"/><circle cx="16" cy="11" r="1" fill="rgba(255,255,255,.7)"/><circle cx="18" cy="13" r="1" fill="rgba(255,255,255,.7)"/></svg></div>
+      <div class="vr-plat-info">
+        <div class="vr-plat-name">DraftKings</div>
+        <div class="vr-plat-url">draftkings.com · Verified operator</div>
+      </div>
+    </div>
+    <div class="vr-asking">is requesting</div>
+    <div class="vr-request">Age verification + KYC status</div>
+  </div>
+  <div class="scroll">
+    <div class="vr-shares">
+      <div class="vr-shares-label">✓ What will be shared</div>
+      <div class="vr-share-item">
+        <div class="vr-share-icon g">✓</div>
+        <div>
+          <div class="vr-share-name">Age status</div>
+          <div style="font-size:.72rem;color:var(--g3);">Over 21 · No date of birth shared</div>
+        </div>
+      </div>
+      <div class="vr-share-item">
+        <div class="vr-share-icon g">✓</div>
+        <div>
+          <div class="vr-share-name">KYC verified</div>
+          <div style="font-size:.72rem;color:var(--g3);">Pass/fail only · No documents shared</div>
+        </div>
+      </div>
+      <div class="vr-share-item">
+        <div class="vr-share-icon g">✓</div>
+        <div>
+          <div class="vr-share-name">AML status</div>
+          <div style="font-size:.72rem;color:var(--g3);">Cleared · No history shared</div>
+        </div>
+      </div>
+    </div>
+    <div class="vr-not-shared">
+      <div class="vr-ns-label">✕ Not shared with DraftKings</div>
+      <div class="vr-ns-items">
+        <div class="vr-ns-tag">Full name</div>
+        <div class="vr-ns-tag">Date of birth</div>
+        <div class="vr-ns-tag">Address</div>
+        <div class="vr-ns-tag">Passport number</div>
+        <div class="vr-ns-tag">Phone number</div>
+        <div class="vr-ns-tag">Email</div>
+        <div class="vr-ns-tag">Biometrics</div>
+      </div>
+    </div>
+    <div style="margin:0 24px;background:var(--g7);border-radius:14px;padding:14px 16px;display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--g3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <div style="font-size:.78rem;color:var(--g3);line-height:1.6;">DraftKings will only receive a cryptographic confirmation — not your data. Nothing is stored on their servers.</div>
+    </div>
+  </div>
+  <div class="vr-foot">
+    <button class="btn btn-p" onclick="goTo('verify-done')">Approve with OwnlyMe →</button>
+    <button class="btn btn-o">Decline</button>
+    <div class="vr-note">Credential stays on your device. One tap. Done.</div>
+  </div>
+</div>
+
+<!-- ════════════ VERIFY DONE ════════════ -->
+<div class="screen" id="verify-done" style="background:var(--navy);">
+  <div class="sb dk"><span class="sb-t" style="color:#fff;">9:41</span><span class="sb-i" style="color:#fff;">●●● 100%</span></div>
+  <div class="vd-inner">
+    <div class="vd-platform">
+      <div class="vd-plat-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="4"/><line x1="8" y1="12" x2="12" y2="12"/><line x1="10" y1="10" x2="10" y2="14"/><circle cx="16" cy="11" r="1" fill="rgba(255,255,255,.7)"/><circle cx="18" cy="13" r="1" fill="rgba(255,255,255,.7)"/></svg></div>
+      <div class="vd-arrow"></div>
+      <div class="vd-ownlyme"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    </div>
+    <div class="vd-check" style="animation:vdPop .5s cubic-bezier(.175,.885,.32,1.275) forwards .2s;transform:scale(0);">
+      <svg viewBox="0 0 52 52"><polyline points="14 26 22 34 38 18"/></svg>
+    </div>
+    <div class="vd-title" style="animation:fadeSlideUp .4s ease forwards .5s;opacity:0;">Verified.</div>
+    <div class="vd-sub" style="animation:fadeSlideUp .4s ease forwards .7s;opacity:0;">DraftKings has your confirmation. Nothing else was shared. No data stored on their side.</div>
+    <div class="vd-stats" style="animation:fadeSlideUp .4s ease forwards .9s;opacity:0;">
+      <div class="vd-stat">
+        <div class="vd-stat-n">1</div>
+        <div class="vd-stat-l">Tap</div>
+      </div>
+      <div class="vd-stat">
+        <div class="vd-stat-n">0</div>
+        <div class="vd-stat-l">Data shared</div>
+      </div>
+      <div class="vd-stat">
+        <div class="vd-stat-n">0ms</div>
+        <div class="vd-stat-l">Friction</div>
+      </div>
+    </div>
+    <div style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px 20px;text-align:left;animation:fadeSlideUp .4s ease forwards 1.1s;opacity:0;">
+      <div style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:10px;">What DraftKings received</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:.82rem;color:rgba(255,255,255,.5);">Age over 21</span>
+          <span style="font-size:.82rem;font-weight:700;color:var(--green);">✓ Confirmed</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:.82rem;color:rgba(255,255,255,.5);">KYC status</span>
+          <span style="font-size:.82rem;font-weight:700;color:var(--green);">✓ Verified</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:.82rem;color:rgba(255,255,255,.5);">AML clear</span>
+          <span style="font-size:.82rem;font-weight:700;color:var(--green);">✓ Cleared</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="padding:16px 24px 36px;flex-shrink:0;animation:fadeSlideUp .4s ease forwards 1.3s;opacity:0;">
+    <button class="btn btn-p" onclick="goTo('home')">Back to my identity →</button>
+  </div>
+</div>
+
+<!-- ════════════ HOME ════════════ -->
+<div class="screen" id="home">
+  <div class="sb dk"><span class="sb-t" style="color:#fff;">9:41</span><span class="sb-i" style="color:#fff;">●●● 100%</span></div>
+  <div class="home-hd">
+    <div class="home-top">
+      <div><div class="hg">Good morning,</div><div class="hn">Alex J. Thorne</div></div>
+      <button class="av" onclick="switchTab('settings')">AJ</button>
+    </div>
+    <div class="id-card">
+      <div><div class="ic-lbl">Identity Score</div><div class="ic-score">980</div><div class="ic-slbl">Premium · Fully verified</div></div>
+      <div class="ic-badge"><div style="margin-bottom:4px;display:flex;justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="ic-badge-t">Verified<br>Digital ID</div></div>
+    </div>
+  </div>
+  <div class="scroll">
+    <!-- Quick verify bar -->
+    <div style="margin:16px 24px 0;background:linear-gradient(135deg,var(--navy),#1a2f52);border-radius:18px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="goTo('verify-req')">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:40px;height:40px;background:rgba(34,197,94,.15);border-radius:12px;display:flex;align-items:center;justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="4"/><line x1="8" y1="12" x2="12" y2="12"/><line x1="10" y1="10" x2="10" y2="14"/><circle cx="16" cy="11" r="1" fill="var(--green)"/><circle cx="18" cy="13" r="1" fill="var(--green)"/></svg></div>
+        <div><div style="font-size:.85rem;font-weight:700;color:#fff;">DraftKings is requesting</div><div style="font-size:.72rem;color:rgba(255,255,255,.4);margin-top:2px;">Age + KYC · Tap to review</div></div>
+      </div>
+      <div style="background:var(--green);color:#fff;border-radius:100px;padding:6px 14px;font-size:.72rem;font-weight:700;">Review</div>
+    </div>
+    <div class="sec-hd"><div class="sec-t">Your credentials</div><button class="sec-a" onclick="switchTab('wallet')">See all</button></div>
+    <div class="cred-list">
+      <div class="cc v" onclick="goTo('idsummary')">
+        <div class="ci g"><svg viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 3H8a2 2 0 00-2 2v2h12V5a2 2 0 00-2-2z"/></svg></div>
+        <div class="cb"><div class="ct">Identity</div><div class="cn">Age Verification</div><div class="cd">Over 21 · Active · London, UK</div></div>
+        <div class="cs v"><div class="cs-dot"></div> Verified</div>
+      </div>
+      <div class="cc v">
+        <div class="ci b"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2-2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+        <div class="cb"><div class="ct">Contact</div><div class="cn">Email Verified</div><div class="cd">a.thorne@example.com</div></div>
+        <div class="cs v"><div class="cs-dot"></div> Verified</div>
+      </div>
+      <div class="cc v">
+        <div class="ci a"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <div class="cb"><div class="ct">Residency</div><div class="cn">Verified Residency</div><div class="cd">42 Sovereign Court, London</div></div>
+        <div class="cs v"><div class="cs-dot"></div> Verified</div>
+      </div>
+      <div class="cc v">
+        <div class="ci s"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        <div class="cb"><div class="ct">Compliance</div><div class="cn">AML Monitoring</div><div class="cd">Clean status · Last checked today</div></div>
+        <div class="cs v"><div class="cs-dot"></div> Clear</div>
+      </div>
+    </div>
+    <div class="sec-hd"><div class="sec-t">Recent activity</div></div>
+    <div class="act-list">
+      <div class="ai"><div class="ai-icon" style="background:#EFF6FF;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="4"/><line x1="8" y1="12" x2="12" y2="12"/><line x1="10" y1="10" x2="10" y2="14"/><circle cx="16" cy="11" r="1" fill="var(--blue)"/><circle cx="18" cy="13" r="1" fill="var(--blue)"/></svg></div><div class="ai-b"><div class="ai-n">DraftKings requesting</div><div class="ai-d">Age + KYC · Pending your approval</div></div><div class="ai-t" style="color:var(--amber);font-weight:600;">Now</div></div>
+      <div class="ai"><div class="ai-icon" style="background:var(--green-l);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg></div><div class="ai-b"><div class="ai-n">Passport scanned & verified</div><div class="ai-d">Document added to vault</div></div><div class="ai-t">Today</div></div>
+      <div class="ai"><div class="ai-icon" style="background:#EFF6FF;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2-2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div class="ai-b"><div class="ai-n">Email verified</div><div class="ai-d">a.thorne@example.com confirmed</div></div><div class="ai-t">Today</div></div>
+      <div class="ai"><div class="ai-icon" style="background:var(--green-l);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 6h.01M8 12h8"/><circle cx="12" cy="8" r="1" fill="var(--green)"/></svg></div><div class="ai-b"><div class="ai-n">Liveness check passed</div><div class="ai-d">Identity confirmed as live person</div></div><div class="ai-t">Today</div></div>
+    </div>
+    <div style="height:16px;"></div>
+  </div>
+  <div class="bnav">
+    <button class="ni on" onclick="switchTab('home')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></button>
+    <button class="ni" onclick="switchTab('wallet')"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span>Wallet</span></button>
+    <button class="ni" onclick="switchTab('idsummary')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>My ID</span></button>
+    <button class="ni" onclick="switchTab('settings')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- ════════════ ID SUMMARY ════════════ -->
+<div class="screen" id="idsummary">
+  <div class="sb dk"><span class="sb-t" style="color:#fff;">9:41</span><span class="sb-i" style="color:#fff;">●●● 100%</span></div>
+  <div class="id-hero">
+    <div class="id-hero-top">
+      <div class="id-screen-t">My Digital ID</div>
+      <button class="qr-btn"><svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><rect x="19" y="14" width="2" height="2"/><rect x="14" y="19" width="7" height="2"/></svg></button>
+    </div>
+    <div class="id-score-wrap">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 120 120" width="120" height="120"><circle class="ring-bg" cx="60" cy="60" r="54"/><circle class="ring-fill" cx="60" cy="60" r="54"/></svg>
+        <div class="ring-center"><div class="ring-n">980</div><div class="ring-max">/ 1000</div></div>
+      </div>
+      <div class="id-score-lbl">Premium Identity</div>
+      <div class="id-vbadge"><span>✓</span><span>Verified Digital Sovereign</span></div>
+    </div>
+  </div>
+  <div class="scroll">
+    <div class="id-grid">
+      <div class="id-card"><div class="id-card-l">Full name</div><div class="id-card-v">Alexander Sterling</div><div class="id-card-s">Verified · Gov. ID</div></div>
+      <div class="id-card"><div class="id-card-l">Date of birth</div><div class="id-card-v">24 Mar, 1992</div><div class="id-card-s">Age: 34</div></div>
+      <div class="id-card"><div class="id-card-l">Handle</div><div class="id-card-v">@alexthorne</div><div class="id-card-s">alexthorne.me</div></div>
+      <div class="id-card"><div class="id-card-l">Location</div><div class="id-card-v">London, UK</div><div class="id-card-s">Verified address</div></div>
+    </div>
+    <div class="sec-hd"><div class="sec-t">Verified credentials</div></div>
+    <div class="cred-list" style="padding-bottom:16px;">
+      <div class="cc v" onclick="goTo('verify-req')"><div class="ci g"><svg viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg></div><div class="cb"><div class="ct">Identity</div><div class="cn">Age Verification</div><div class="cd">Over 21 · Expires Oct 2025</div></div><div class="cs v"><div class="cs-dot"></div> Active</div></div>
+      <div class="cc v"><div class="ci a"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div class="cb"><div class="ct">KYC</div><div class="cn">Verified Residency</div><div class="cd">42 Sovereign Court, London</div></div><div class="cs v"><div class="cs-dot"></div> Active</div></div>
+      <div class="cc v"><div class="ci s"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg></div><div class="cb"><div class="ct">AML</div><div class="cn">AML Monitoring</div><div class="cd">Cleared · Biometric-linked</div></div><div class="cs v"><div class="cs-dot"></div> Cleared</div></div>
+    </div>
+  </div>
+  <div class="bnav">
+    <button class="ni" onclick="switchTab('home')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></button>
+    <button class="ni" onclick="switchTab('wallet')"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span>Wallet</span></button>
+    <button class="ni on" onclick="switchTab('idsummary')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>My ID</span></button>
+    <button class="ni" onclick="switchTab('settings')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- ════════════ WALLET ════════════ -->
+<div class="screen" id="wallet">
+  <div class="sb"><span class="sb-t">9:41</span><span class="sb-i">●●● 100%</span></div>
+  <div class="w-hd"><div class="w-t">Wallet</div><button class="w-add"><svg viewBox="0 0 18 18"><line x1="9" y1="3" x2="9" y2="15"/><line x1="3" y1="9" x2="15" y2="9"/></svg></button></div>
+  <div class="tabs"><button class="tab on">All</button><button class="tab">Identity</button><button class="tab">KYC</button><button class="tab">AML</button></div>
+  <div class="feat-cred"><div class="fc-glow"></div><div class="fc-top"><div class="fc-tag">Age Verification · Identity</div><div class="fc-status">Active</div></div><div class="fc-title">Age Verification</div><div class="fc-sub">Over 21 · Accepted across all integrated platforms. One tap to confirm.</div><div class="fc-bottom"><div><div class="fc-b-lbl">Status</div><div class="fc-b-val g">OVER 21 · CLEARED</div></div><div><div class="fc-b-lbl">Location</div><div class="fc-b-val">LONDON, UK</div></div><div><div class="fc-b-lbl">Expires</div><div class="fc-b-val" style="color:rgba(255,255,255,.5);">Oct 2025</div></div></div></div>
+  <div class="scroll">
+    <div class="sec-hd" style="padding-top:18px;"><div class="sec-t">Connected platforms</div></div>
+    <div class="act-list" style="padding:0 24px 8px;">
+      <div class="ai"><div class="ai-icon" style="background:#EFF6FF;font-size:.75rem;font-weight:700;color:var(--blue);">DK</div><div class="ai-b"><div class="ai-n">DraftKings</div><div class="ai-d">Age + KYC · Pending</div></div><div style="width:8px;height:8px;background:var(--amber);border-radius:50%;"></div></div>
+      <div class="ai"><div class="ai-icon" style="background:#FEF3C7;font-size:.75rem;font-weight:700;color:#D97706;">MT</div><div class="ai-b"><div class="ai-n">Metalarea</div><div class="ai-d">KYC + Age · Active</div></div><div style="width:8px;height:8px;background:var(--green);border-radius:50%;"></div></div>
+      <div class="ai"><div class="ai-icon" style="background:#F0FDF4;font-size:.75rem;font-weight:700;color:var(--green-d);">BB</div><div class="ai-b"><div class="ai-n">BlackBolt</div><div class="ai-d">Identity · Active</div></div><div style="width:8px;height:8px;background:var(--green);border-radius:50%;"></div></div>
+    </div>
+    <div class="sec-hd"><div class="sec-t">All credentials</div></div>
+    <div class="cred-list" style="padding-bottom:16px;">
+      <div class="cc v"><div class="ci g"><svg viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg></div><div class="cb"><div class="ct">Identity</div><div class="cn">Age Verification</div><div class="cd">Over 21 · Expires Oct 2025</div></div><div class="cs v"><div class="cs-dot"></div> Active</div></div>
+      <div class="cc v"><div class="ci b"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2-2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div class="cb"><div class="ct">Contact</div><div class="cn">Email Verified</div><div class="cd">a.thorne@example.com</div></div><div class="cs v"><div class="cs-dot"></div> Active</div></div>
+      <div class="cc v"><div class="ci p"><svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/></svg></div><div class="cb"><div class="ct">Contact</div><div class="cn">Mobile Authentication</div><div class="cd">+44 7700 900555</div></div><div class="cs v"><div class="cs-dot"></div> Active</div></div>
+      <div class="cc v"><div class="ci a"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div class="cb"><div class="ct">Residency</div><div class="cn">Verified Residency</div><div class="cd">42 Sovereign Court, London</div></div><div class="cs v"><div class="cs-dot"></div> Active</div></div>
+      <div class="cc v"><div class="ci s"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg></div><div class="cb"><div class="ct">Compliance</div><div class="cn">AML Monitoring</div><div class="cd">Cleared · Biometric-linked</div></div><div class="cs v"><div class="cs-dot"></div> Cleared</div></div>
+    </div>
+  </div>
+  <div class="bnav">
+    <button class="ni" onclick="switchTab('home')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></button>
+    <button class="ni on" onclick="switchTab('wallet')"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span>Wallet</span></button>
+    <button class="ni" onclick="switchTab('idsummary')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>My ID</span></button>
+    <button class="ni" onclick="switchTab('settings')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Settings</span></button>
+  </div>
+</div>
+
+<!-- ════════════ SETTINGS ════════════ -->
+<div class="screen" id="settings">
+  <div class="sb"><span class="sb-t">9:41</span><span class="sb-i">●●● 100%</span></div>
+  <div class="set-hd"><div class="set-t">Settings</div></div>
+  <div class="scroll">
+    <div class="set-profile">
+      <div class="set-av">AJ</div>
+      <div><div class="set-name">Alex J. Thorne</div><div class="set-handle">@alexthorne.me</div></div>
+      <div class="set-badge">Premium</div>
+    </div>
+    <div class="set-sec">
+      <div class="set-sec-lbl">Preferences</div>
+      <div class="set-grp">
+        <div class="set-row"><div class="sr-ic g"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg></div><div class="sr-b"><div class="sr-n">Push Notifications</div><div class="sr-s">Credential activity alerts</div></div><div class="sr-r"><div class="tgl on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div></div></div>
+        <div class="set-row"><div class="sr-ic b"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg></div><div class="sr-b"><div class="sr-n">Connected apps</div><div class="sr-s">Manage platform access</div></div><div class="sr-r"><div class="sr-badge">3</div><svg viewBox="0 0 16 16"><polyline points="6 4 10 8 6 12"/></svg></div></div>
+      </div>
+    </div>
+    <div class="set-sec">
+      <div class="set-sec-lbl">Core Credentials</div>
+      <div class="set-grp">
+        <div class="set-row" onclick="switchTab('idsummary')"><div class="sr-ic g"><svg viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg></div><div class="sr-b"><div class="sr-n">Age Verification</div><div class="sr-s">Over 21 · Active · Expires Oct 2025</div></div><div class="sr-r"><svg viewBox="0 0 16 16"><polyline points="6 4 10 8 6 12"/></svg></div></div>
+        <div class="set-row"><div class="sr-ic a"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><div class="sr-b"><div class="sr-n">Verified Residency</div><div class="sr-s">London, UK · Cleared</div></div><div class="sr-r"><svg viewBox="0 0 16 16"><polyline points="6 4 10 8 6 12"/></svg></div></div>
+      </div>
+    </div>
+    <div class="set-sec">
+      <div class="set-sec-lbl">Security</div>
+      <div class="set-grp">
+        <div class="set-row"><div class="sr-ic g"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="sr-b"><div class="sr-n">Biometrics</div><div class="sr-s">Face ID enabled</div></div><div class="sr-r"><div class="tgl on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div></div></div>
+        <div class="set-row"><div class="sr-ic s"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><div class="sr-b"><div class="sr-n">Privacy Policy</div></div><div class="sr-r"><svg viewBox="0 0 16 16"><polyline points="6 4 10 8 6 12"/></svg></div></div>
+        <div class="set-row"><div class="sr-ic r"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg></div><div class="sr-b"><div class="sr-n" style="color:var(--red);">Sign out</div></div><div class="sr-r"><svg viewBox="0 0 16 16"><polyline points="6 4 10 8 6 12"/></svg></div></div>
+      </div>
+    </div>
+    <div class="vl-bar"><div><div class="vl-t">Powered by</div><div class="vl-n">Valearion</div></div><div class="vl-arr"><svg viewBox="0 0 16 16"><polyline points="6 4 10 8 6 12"/></svg></div></div>
+    <div style="height:8px;"></div>
+  </div>
+  <div class="bnav">
+    <button class="ni" onclick="switchTab('home')"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></button>
+    <button class="ni" onclick="switchTab('wallet')"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span>Wallet</span></button>
+    <button class="ni" onclick="switchTab('idsummary')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>My ID</span></button>
+    <button class="ni on" onclick="switchTab('settings')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Settings</span></button>
+  </div>
+</div>
+
+</div><!-- /phone -->
+
+<script>
+// ── NAVIGATION ──
+let hist = ['splash'];
+let busy = false;
+
+function goTo(id) {
+  if(busy) return;
+  const cur = hist[hist.length-1];
+  if(cur===id) return;
+  busy=true;
+  const from=document.getElementById(cur);
+  const to=document.getElementById(id);
+  to.style.transform='translateX(100%)';
+  to.classList.add('active');
+  requestAnimationFrame(()=>{
+    from.style.transition='transform .36s cubic-bezier(.4,0,.2,1)';
+    from.style.transform='translateX(-28%)';
+    to.style.transition='transform .36s cubic-bezier(.4,0,.2,1)';
+    to.style.transform='translateX(0)';
+  });
+  setTimeout(()=>{
+    from.classList.remove('active');
+    from.style.transform=''; from.style.transition='';
+    to.style.transition='';
+    busy=false;
+    // Trigger processing animations
+    if(id==='processing') startProcessing('ps',['docscan'],'email-entry');
+    if(id==='liveness-processing') startProcessing('lps',['liveness-intro','liveness','email-otp'],'cred-created');
+  },380);
+  hist.push(id);
+}
+
+function goBack() {
+  if(busy||hist.length<2) return;
+  busy=true;
+  const cur=hist[hist.length-1];
+  const prev=hist[hist.length-2];
+  const from=document.getElementById(cur);
+  const to=document.getElementById(prev);
+  to.style.transform='translateX(-28%)';
+  to.classList.add('active');
+  requestAnimationFrame(()=>{
+    from.style.transition='transform .36s cubic-bezier(.4,0,.2,1)';
+    from.style.transform='translateX(100%)';
+    to.style.transition='transform .36s cubic-bezier(.4,0,.2,1)';
+    to.style.transform='translateX(0)';
+  });
+  setTimeout(()=>{
+    from.classList.remove('active');
+    from.style.transform=''; from.style.transition='';
+    to.style.transition='';
+    busy=false;
+  },380);
+  hist.pop();
+}
+
+function switchTab(id) {
+  if(busy) return;
+  const cur=hist[hist.length-1];
+  if(cur===id) return;
+  busy=true;
+  const from=document.getElementById(cur);
+  const to=document.getElementById(id);
+  to.style.opacity='0'; to.style.transform='translateX(0)';
+  to.classList.add('active');
+  requestAnimationFrame(()=>{
+    from.style.transition='opacity .22s ease';
+    from.style.opacity='0';
+    to.style.transition='opacity .22s ease .06s';
+    to.style.opacity='1';
+  });
+  setTimeout(()=>{
+    from.classList.remove('active');
+    from.style.opacity=''; from.style.transition='';
+    to.style.transition=''; to.style.opacity='';
+    busy=false;
+  },300);
+  const main=['home','wallet','idsummary','settings'];
+  hist=hist.filter(h=>!main.includes(h));
+  hist.push(id);
+}
+
+// ── PROCESSING ANIMATION ──
+function startProcessing(prefix, skipScreens, nextScreen) {
+  const steps=[1,2,3,4];
+  let i=0;
+  function advance() {
+    if(i>0) {
+      const prev=document.getElementById(prefix+(i));
+      if(prev) {
+        prev.querySelector('.proc-step-icon').className='proc-step-icon done';
+        prev.querySelector('.proc-step-icon').textContent='✓';
+        prev.className='proc-step done-step';
+      }
+    }
+    i++;
+    if(i<=4) {
+      const cur=document.getElementById(prefix+i);
+      if(cur) {
+        cur.querySelector('.proc-step-icon').className='proc-step-icon active';
+        cur.querySelector('.proc-step-icon').textContent='⟳';
+        cur.className='proc-step active-step';
+      }
+      setTimeout(advance, 900);
+    } else {
+      setTimeout(()=>{ goTo(nextScreen); },400);
+    }
+  }
+  setTimeout(advance, 600);
+}
+
+// ── USERNAME ──
+function checkU() {
+  const v=document.getElementById('uInput').value;
+  const btn=document.getElementById('uBtn');
+  const hint=document.getElementById('uHint');
+  const ok=/^[a-zA-Z0-9_]{3,}$/.test(v);
+  btn.disabled=!ok;
+  if(v&&!ok){ hint.textContent=v.length<3?'Too short — min 3 characters.':'Letters, numbers, underscores only.'; hint.className='fi-hint'; }
+  else if(ok){ hint.textContent='@'+v+'.me is available ✓'; hint.className='fi-hint ok'; }
+  else{ hint.textContent='Letters, numbers, underscores. Min 3 chars.'; hint.className='fi-hint'; }
+}
+
+// ── PASSWORD ──
+function checkPW() {
+  const p=document.getElementById('pwInput').value;
+  const l=p.length>=12, s=/[^a-zA-Z0-9]/.test(p), u=/[A-Z]/.test(p);
+  document.getElementById('req1').className='pw-r'+(l?' ok':'');
+  document.getElementById('req2').className='pw-r'+(s?' ok':'');
+  document.getElementById('req3').className='pw-r'+(u?' ok':'');
+  const score=[l,s,u,p.length>=16].filter(Boolean).length;
+  ['pb1','pb2','pb3','pb4'].forEach((id,i)=>{
+    const el=document.getElementById(id); el.className='pw-b';
+    if(i<score) el.classList.add(score<=1?'w':score<=2?'m':'s');
+  });
+}
+function togglePw(id) {
+  const el=document.getElementById(id);
+  el.type=el.type==='password'?'text':'password';
+}
+
+// ── PIN ──
+let pin='';
+function pinP(d) {
+  if(pin.length>=6) return;
+  pin+=d;
+  updatePinDots();
+  if(pin.length===6){
+    document.getElementById('pinBtn').disabled=false;
+    setTimeout(()=>goTo('doctype'), 400);
+  }
+}
+function pinDel() {
+  if(!pin.length) return;
+  pin=pin.slice(0,-1);
+  updatePinDots();
+  document.getElementById('pinBtn').disabled=true;
+}
+function updatePinDots() {
+  for(let i=0;i<6;i++) document.getElementById('pd'+i).classList.toggle('on',i<pin.length);
+}
+
+// ── DOC SELECT ──
+function selectDoc(el) {
+  document.querySelectorAll('.doc-opt').forEach(d=>d.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+// ── OTP ──
+function otpNext(el,i) {
+  if(el.value&&i<5) document.getElementById('otp'+(i+1)).focus();
+}
+
+// ── CLOCK ──
+function tick() {
+  const n=new Date();
+  const t=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
+  document.querySelectorAll('.sb-t').forEach(e=>e.textContent=t);
+}
+tick(); setInterval(tick,10000);
+</script>
+</body>
+</html>
